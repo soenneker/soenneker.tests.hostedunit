@@ -31,7 +31,7 @@ public abstract class HostedUnitTest : UnitTest, IHostedUnitTest
         _backgroundQueue = new Lazy<IBackgroundQueue>(() => Resolve<IBackgroundQueue>(), LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
-    public T Resolve<T>(bool scoped = false)
+    public T Resolve<T>(bool scoped = false) where T : notnull
     {
         if (!scoped)
             return Host.ServicesProvider.Get<T>();
