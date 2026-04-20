@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Soenneker.Extensions.ServiceProvider;
 using Soenneker.Extensions.ValueTask;
-using Soenneker.TestHosts.Core;
+using Soenneker.TestHosts.Unit;
 using Soenneker.Tests.HostedUnit.Abstract;
 using Soenneker.Tests.Logging;
 using Soenneker.Tests.Unit;
@@ -16,13 +16,13 @@ namespace Soenneker.Tests.HostedUnit;
 ///<inheritdoc cref="IHostedUnitTest"/>
 public abstract class HostedUnitTest : UnitTest, IHostedUnitTest
 {
-    public TestHost Host { get; }
+    public UnitTestHost Host { get; }
 
     public AsyncServiceScope? Scope { get; private set; }
 
     private readonly Lazy<IBackgroundQueue> _backgroundQueue;
 
-    protected HostedUnitTest(TestHost host) : base(host.AutoFaker, enableLogging: false)
+    protected HostedUnitTest(UnitTestHost host) : base(host.AutoFaker, enableLogging: false)
     {
         Host = host ?? throw new ArgumentNullException(nameof(host));
 
