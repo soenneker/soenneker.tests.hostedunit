@@ -33,24 +33,17 @@ public abstract class HostedUnitTest : UnitTest, IHostedUnitTest
 
     public T Resolve<T>(bool scoped = false)
     {
-        if (Host.ServicesProvider == null)
-            throw new Exception($"ServiceProvider was null trying to resolve service {typeof(T).Name}! Not able to resolve service");
-
         if (!scoped)
             return Host.ServicesProvider.Get<T>();
 
-        if (Scope == null)
-            CreateScope();
+        Scope ??= Host.ServicesProvider.CreateAsyncScope();
 
-        return Scope!.Value.ServiceProvider.Get<T>();
+        return Scope.Value.ServiceProvider.Get<T>();
     }
 
     public void CreateScope()
     {
-        if (Host.ServicesProvider == null)
-            throw new Exception("ServiceProvider was null trying create a scope!");
-
-        Scope = Host.ServicesProvider.CreateAsyncScope();
+        Scope ??= Host.ServicesProvider.CreateAsyncScope();
     }
 
     public ValueTask WaitOnQueueToEmpty(CancellationToken cancellationToken = default)
