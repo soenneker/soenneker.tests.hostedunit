@@ -1,9 +1,13 @@
-using Soenneker.Tests.Unit;
-
 namespace Soenneker.Tests.HostedUnit.Tests;
 
-public sealed class HostedUnitTestTests : UnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public sealed class HostedUnitTestTests : HostedUnitTest
 {
+    public HostedUnitTestTests(Host host) : base(host)
+    {
+
+    }
+
     [Test]
     public void Default()
     {
