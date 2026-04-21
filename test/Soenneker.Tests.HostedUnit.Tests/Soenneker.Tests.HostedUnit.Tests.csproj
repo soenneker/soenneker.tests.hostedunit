@@ -5,11 +5,12 @@
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
+        <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     </PropertyGroup>
 
     <PropertyGroup>
-        <TestingPlatformCommandLineArguments>--output Detailed</TestingPlatformCommandLineArguments>
-        <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
+
     </PropertyGroup>
 
     <ItemGroup>
