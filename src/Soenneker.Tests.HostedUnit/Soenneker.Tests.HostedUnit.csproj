@@ -42,7 +42,7 @@
 
     <ItemGroup>
         <PackageReference Include="Soenneker.Extensions.ServiceProvider" Version="4.0.326" />
-        <PackageReference Include="Soenneker.TestHosts.Unit" Version="4.0.66" />
+        <PackageReference Include="Soenneker.TestHosts.Unit" Version="4.0.67" />
         <PackageReference Include="Soenneker.Tests.Unit" Version="4.0.1194" />
         <PackageReference Include="Soenneker.Utils.BackgroundQueue" Version="4.0.2412" />
     </ItemGroup>
