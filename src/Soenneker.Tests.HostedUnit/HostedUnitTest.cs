@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Soenneker.Tests.HostedUnit;
 
-///<inheritdoc cref="IHostedUnitTest"/>
+/// <inheritdoc cref="IHostedUnitTest"/>
 public abstract class HostedUnitTest : UnitTest, IHostedUnitTest
 {
     public UnitTestHost Host { get; }
