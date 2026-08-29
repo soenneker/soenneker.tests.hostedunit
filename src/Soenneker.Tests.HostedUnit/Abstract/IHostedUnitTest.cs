@@ -13,6 +13,9 @@ public interface IHostedUnitTest : IAsyncDisposable
     /// <summary>
     /// Resolves a service from the host service provider.
     /// </summary>
+    /// <typeparam name="T">Type of value handled by the Hosted Unit Test.</typeparam>
+    /// <param name="scoped">Whether scoped.</param>
+    /// <returns>The resulting value.</returns>
     /// <remarks>
     /// Optionally creates a scope if needed, if one does not already exist.
     /// </remarks>
@@ -29,5 +32,7 @@ public interface IHostedUnitTest : IAsyncDisposable
     /// <summary>
     /// Checks the background queue until it is empty.
     /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the wait on queue to empty operation is complete.</returns>
     ValueTask WaitOnQueueToEmpty(CancellationToken cancellationToken = default);
 }
