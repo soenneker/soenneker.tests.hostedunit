@@ -1,46 +1,67 @@
 [![](https://img.shields.io/nuget/v/soenneker.tests.hostedunit.svg?style=for-the-badge)](https://www.nuget.org/packages/soenneker.tests.hostedunit/)
 [![](https://img.shields.io/github/actions/workflow/status/soenneker/soenneker.tests.hostedunit/publish-package.yml?style=for-the-badge)](https://github.com/soenneker/soenneker.tests.hostedunit/actions/workflows/publish-package.yml)
 [![](https://img.shields.io/nuget/dt/soenneker.tests.hostedunit.svg?style=for-the-badge)](https://www.nuget.org/packages/soenneker.tests.hostedunit/)
+[![](https://img.shields.io/github/actions/workflow/status/soenneker/soenneker.tests.hostedunit/codeql.yml?label=CodeQL&style=for-the-badge)](https://github.com/soenneker/soenneker.tests.hostedunit/actions/workflows/codeql.yml)
 
 # Soenneker.Tests.HostedUnit
 
-A hosted test that provides synthetic inversion of control via `TestHost`. Its most used function is `Resolve{T}`, which retrieves a service from the host service provider.
+A TUnit base class for tests that resolve services from a shared `UnitTestHost` while owning a per-test dependency-injection scope.
 
-## Install
+## Installation
 
 ```bash
 dotnet add package Soenneker.Tests.HostedUnit
 ```
 
-## Quick start
+## Define the host
 
 ```csharp
-using Soenneker.Tests.HostedUnit.Abstract;
+using Microsoft.Extensions.DependencyInjection;
+using Soenneker.TestHosts.Unit;
 
-IHostedUnitTest hostedUnitTest = /* resolve from DI */;
-var result = hostedUnitTest.Resolve();
+public sealed class Host : UnitTestHost
+{
+    public override Task InitializeAsync()
+    {
+        Services.AddSingleton<IClock, TestClock>();
+        Services.AddScoped<OrderService>();
+
+        return base.InitializeAsync();
+    }
+}
 ```
 
-Resolves a service from the host service provider.
+## Define the tests
 
-## What you get
+```csharp
+using Soenneker.Tests.HostedUnit;
 
-- `IHostedUnitTest` — A hosted test that provides synthetic inversion of control via `TestHost`. Its most used function is `Resolve{T}`, which retrieves a service from the host service provider.
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public sealed class OrderServiceTests : HostedUnitTest
+{
+    public OrderServiceTests(Host host) : base(host)
+    {
+    }
 
-## API at a glance
+    [Test]
+    public async Task Creates_an_order()
+    {
+        OrderService service = Resolve<OrderService>(scoped: true);
+        CreateOrder request = AutoFaker.Generate<CreateOrder>();
 
-| API | What it does | Result / important behavior |
-| --- | --- | --- |
-| `IHostedUnitTest.Resolve(scoped)` | Resolves a service from the host service provider. | The resulting value. |
-| `IHostedUnitTest.CreateScope()` | Creates a scope for resolving scoped services. | Usually you will want to use `Resolve{T}` instead. |
-| `IHostedUnitTest.WaitOnQueueToEmpty(cancellationToken)` | Checks the background queue until it is empty. | A task that completes when the wait on queue to empty operation is complete. |
+        Order result = await service.Create(request);
 
-## Important behavior
+        await Assert.That(result.Id).IsNotEqualTo(Guid.Empty);
+    }
+}
+```
 
-- `IHostedUnitTest.Resolve(scoped)`: Optionally creates a scope if needed, if one does not already exist.
-- `IHostedUnitTest.CreateScope()`: Usually you will want to use `Resolve{T}` instead.
+`Resolve<T>()` resolves from the shared host's root provider. `Resolve<T>(scoped: true)` lazily creates one async scope for the test instance, reuses it for subsequent scoped resolutions, and disposes it after the test. `CreateScope()` can establish that scope explicitly and is idempotent while it exists.
 
-## Practical notes
+The base class reuses the host's `AutoFaker`. Its `Logger` is resolved through the test scope, so log output follows the logging services configured by the host.
 
-- Cancellation stops pending work; it does not undo work that has already completed.
-- Dispose instances you own when their scope ends so held resources can be released.
+## Background work
+
+If the host registers `IBackgroundQueue`, `WaitOnQueueToEmpty(cancellationToken)` waits for its queued work to finish before assertions or teardown continue. Supply a bounded cancellation token so a stuck producer cannot hang the test run. Accessing this method without an `IBackgroundQueue` registration fails service resolution.
+
+The `ClassDataSource` should be shared so TUnit initializes and disposes the host once while each test instance still owns and disposes its own scope.
