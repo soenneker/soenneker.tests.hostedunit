@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using System.Threading;
 
 namespace Soenneker.Tests.HostedUnit.Tests;
 
@@ -12,17 +13,17 @@ public sealed class HostedUnitTestTests : HostedUnitTest
     }
 
     [Test]
-    public async ValueTask Default()
+    public async ValueTask Default(CancellationToken cancellationToken)
     {
     }
 
     [Test]
-    public async ValueTask Realtime_log()
+    public async ValueTask Realtime_log(CancellationToken cancellationToken)
     {
         for (var x = 0; x < 10; x++)
         {
             Logger.LogInformation("Testing");
-            await Task.Delay(1000);
+            await Task.Delay(1000, cancellationToken: cancellationToken);
         }
     }
 }
